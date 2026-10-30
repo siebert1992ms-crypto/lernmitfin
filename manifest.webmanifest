@@ -1,0 +1,16 @@
+{
+  "name": "Englisch mit Finn",
+  "short_name": "Finn",
+  "description": "Englisch lernen für Grundschulkinder mit Wortschatz, Hören und Sternen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EAF3FF",
+  "theme_color": "#2468E8",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

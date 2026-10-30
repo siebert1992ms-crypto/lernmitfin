@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EAF3FF">
+<meta name="theme-color" content="#0E1630" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{color-scheme:light}</style>
+<title>Englisch mit Finn</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: eine schmale Lernspur wie ein Wanderweg; Einheiten sind runde Stationen, die Lektion füllt den ganzen Bildschirm. */
+:root{
+  --bg:#EAF3FF; --surface:#FFFFFF; --ink:#16264A; --muted:#566690; --line:#CFE0F8;
+  --primary:#2468E8; --primary-d:#1749A8; --on-primary:#FFFFFF;
+  --sun:#FFC83D; --sun-d:#C98F00; --shadow:#B9CDEE;
+  --good:#1FA463; --good-bg:#D9F6E6; --good-ink:#0E6B3F;
+  --bad:#E0434A; --bad-bg:#FFE1E2; --bad-ink:#A3222A;
+  --f-display:'Fredoka',ui-rounded,'Nunito',system-ui,sans-serif;
+  --f-body:'Nunito',ui-rounded,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1630; --surface:#18254D; --ink:#EDF2FF; --muted:#A4B4DA; --line:#2B3D74;
+    --primary:#6BA1FF; --primary-d:#3F78DA; --on-primary:#0B1330;
+    --sun:#FFD25C; --sun-d:#C99400; --shadow:#0A1022;
+    --good:#3CCB86; --good-bg:#12392B; --good-ink:#8CF0BD;
+    --bad:#FF6B72; --bad-bg:#43191D; --bad-ink:#FFB3B7;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1630; --surface:#18254D; --ink:#EDF2FF; --muted:#A4B4DA; --line:#2B3D74;
+  --primary:#6BA1FF; --primary-d:#3F78DA; --on-primary:#0B1330;
+  --sun:#FFD25C; --sun-d:#C99400; --shadow:#0A1022;
+  --good:#3CCB86; --good-bg:#12392B; --good-ink:#8CF0BD;
+  --bad:#FF6B72; --bad-bg:#43191D; --bad-ink:#FFB3B7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.45;
+  padding-block:12px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent;padding:0}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance}
+#app{max-width:560px;margin:0 auto}
+
+/* Kopf und Chips */
+.top{display:flex;align-items:center;gap:12px;padding:8px 0 14px}
+.fox{width:68px;height:68px;flex:none}
+.hello{flex:1;min-width:0}
+.hello h1{font-size:27px;line-height:1.1}
+.hello p{margin:3px 0 0;color:var(--muted);font-size:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:3px 12px 3px 9px;font-family:var(--f-display);font-weight:600;font-size:17px;min-height:38px}
+.chip svg{width:20px;height:20px;flex:none}
+.chip.btn-chip{cursor:pointer}
+.chip.off{opacity:.6}
+
+/* Lernspur */
+.path{display:flex;flex-direction:column;gap:24px;padding:22px 0 28px}
+.node{display:flex;flex-direction:column;align-items:center;gap:4px;transform:translateX(var(--x,0px));align-self:center;text-align:center}
+.bubble{width:94px;height:94px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:46px;line-height:1;box-shadow:0 7px 0 rgba(0,0,0,.24);transition:transform .08s,box-shadow .08s;position:relative}
+.node:active .bubble{transform:translateY(5px);box-shadow:0 2px 0 rgba(0,0,0,.24)}
+.node b{font-family:var(--f-display);font-weight:600;font-size:20px;margin-top:6px}
+.node small{color:var(--muted);font-size:14px;font-weight:700;margin-top:-4px}
+.stars{display:flex;gap:2px;margin-top:2px}
+.star{width:22px;height:22px}
+.star path{fill:var(--line)}
+.star.on path{fill:var(--sun);stroke:var(--sun-d);stroke-width:1;stroke-linejoin:round}
+.node.next .bubble::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:4px solid var(--sun);animation:ring 1.8s ease-out infinite}
+.tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--sun);color:#3B2A00;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.05em;padding:1px 10px;border-radius:999px;white-space:nowrap;box-shadow:0 3px 0 var(--sun-d);z-index:1}
+@keyframes ring{0%{transform:scale(.92);opacity:.9}100%{transform:scale(1.14);opacity:0}}
+
+/* Buttons */
+.btn{display:block;width:100%;border-radius:18px;padding:14px 18px;font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:.02em;text-align:center;background:var(--surface);color:var(--primary);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary);box-shadow:0 5px 0 var(--primary-d)}
+.btn.primary:active{box-shadow:0 2px 0 var(--primary-d)}
+.btn[disabled]{background:var(--line);color:var(--muted);border-color:var(--line);box-shadow:none;cursor:not-allowed}
+.btn.good{background:var(--good);border-color:var(--good);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.stack{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+
+/* Einheit: Wortkarten */
+.uhead{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
+.back{width:44px;height:44px;border-radius:50%;background:var(--surface);border:2px solid var(--line);font-size:22px;display:grid;place-items:center;flex:none}
+.utitle{display:flex;align-items:center;gap:12px;min-width:0}
+.ubadge{width:56px;height:56px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:30px;flex:none}
+.utitle h2{font-size:26px;line-height:1.1}
+.utitle p{margin:0;color:var(--muted);font-size:15px;font-weight:700}
+.hint{color:var(--muted);margin:6px 0 14px;font-size:16px}
+.wgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wcard{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 0 var(--line);min-width:0}
+.wcard:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.wpic{font-size:40px;line-height:1.1}
+.wcard b{font-family:var(--f-display);font-weight:600;font-size:21px;overflow-wrap:anywhere;text-align:center}
+.wcard small{color:var(--muted);font-weight:700;font-size:15px;overflow-wrap:anywhere;text-align:center}
+
+/* Lektion */
+.lesson{max-width:560px;margin:0 auto;display:flex;flex-direction:column;min-height:calc(100vh - 150px)}
+.lhead{display:flex;align-items:center;gap:12px;padding:4px 0 8px}
+.x{width:44px;height:44px;font-size:24px;border-radius:50%;color:var(--muted);flex:none}
+.bar{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);border-radius:999px;transition:width .35s}
+.q{flex:1;padding:10px 0 150px;display:flex;flex-direction:column;gap:18px}
+.q h2{font-size:25px;line-height:1.2}
+.big{font-size:88px;line-height:1.1;text-align:center;padding:4px 0}
+.word{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-family:var(--f-display);font-weight:600;font-size:36px;text-align:center;padding:4px 0}
+.speak{width:56px;height:56px;border-radius:50%;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;box-shadow:0 4px 0 var(--primary-d);flex:none}
+.speak svg{width:28px;height:28px}
+.speak.huge{width:112px;height:112px;margin:6px auto}
+.speak.huge svg{width:56px;height:56px}
+.speak:active{transform:translateY(3px);box-shadow:0 1px 0 var(--primary-d)}
+.opts{display:flex;flex-direction:column;gap:12px}
+.opts.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:14px 16px;font-family:var(--f-display);font-weight:600;font-size:23px;text-align:center;box-shadow:0 4px 0 var(--line);min-height:64px;overflow-wrap:anywhere}
+.opt.pic{font-size:60px;line-height:1.1;padding:12px 8px}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.opt.sel{border-color:var(--primary);box-shadow:0 4px 0 var(--primary);background:var(--surface)}
+.opt.ok{border-color:var(--good);background:var(--good-bg);color:var(--good-ink);box-shadow:0 4px 0 var(--good)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-ink);box-shadow:0 4px 0 var(--bad)}
+.opt[disabled]{cursor:default}
+
+/* Buchstaben legen */
+.slots{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:68px;padding:10px 0;border-bottom:3px dashed var(--line)}
+.slot{width:48px;height:56px;border-radius:12px;background:var(--bg);border:2px dashed var(--line);display:grid;place-items:center}
+.bank{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding-top:6px}
+.tile{width:52px;height:60px;border-radius:14px;background:var(--surface);border:2px solid var(--line);font-family:var(--f-display);font-weight:600;font-size:30px;box-shadow:0 4px 0 var(--line);display:grid;place-items:center;text-transform:lowercase}
+.tile:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.tile.gap{visibility:hidden}
+.slots .tile.ok{background:var(--good-bg);border-color:var(--good);color:var(--good-ink);box-shadow:0 4px 0 var(--good)}
+.slots .tile.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad-ink);box-shadow:0 4px 0 var(--bad)}
+
+/* Fußleiste der Lektion */
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:2px solid var(--line);
+  padding:14px max(16px,env(safe-area-inset-left,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px));z-index:5}
+.foot.ok{background:var(--good-bg);border-color:var(--good)}
+.foot.bad{background:var(--bad-bg);border-color:var(--bad)}
+.foot-in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.fb{font-family:var(--f-display);font-weight:600;font-size:22px;min-height:0}
+.foot.ok .fb{color:var(--good-ink)}
+.foot.bad .fb{color:var(--bad-ink)}
+.fb small{display:block;font-family:var(--f-body);font-weight:700;font-size:17px}
+
+/* Ergebnis */
+.result{text-align:center;padding-top:20px}
+.result .fox{width:150px;height:150px;animation:hop 1s ease-in-out 2}
+.result h1{font-size:32px;margin-top:8px}
+.rstars{display:flex;justify-content:center;gap:8px;margin:14px 0 6px}
+.rstars .star{width:64px;height:64px}
+.rstars .star.on{animation:pop .5s both}
+.rstars .star:nth-child(2).on{animation-delay:.2s}
+.rstars .star:nth-child(3).on{animation-delay:.4s}
+.gain{display:inline-flex;gap:8px;align-items:center;font-family:var(--f-display);font-weight:600;font-size:24px;background:var(--surface);border:2px solid var(--line);padding:6px 18px;border-radius:999px;margin-top:6px}
+@keyframes pop{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+/* Beenden-Abfrage */
+.modal{position:fixed;inset:0;background:rgba(8,14,34,.6);display:grid;place-items:center;padding:20px;z-index:20}
+.modal .card{background:var(--surface);border-radius:24px;padding:22px;max-width:400px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:center}
+.modal h2{font-size:24px}
+.modal p{margin:0;color:var(--muted)}
+
+.ai-tag{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(5px + env(safe-area-inset-bottom,0px));font-family:var(--f-display);font-weight:500;font-size:10.5px;letter-spacing:.06em;color:var(--muted);opacity:.7;pointer-events:none;z-index:30}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:380px){.big{font-size:72px}.word{font-size:30px}.opt{font-size:21px}}
+
+/* Stimme und langsames Vorlesen */
+.foxbtn{flex:none;width:68px;height:68px;border-radius:50%}
+.foxbtn:active{transform:scale(.94)}
+.slowbtn{align-self:center;display:inline-flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:600;font-size:17px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 16px;box-shadow:0 3px 0 var(--line)}
+.slowbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.word .slowbtn{align-self:auto}
+.set{display:flex;flex-direction:column;gap:18px;margin-top:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--f-display);font-weight:600;font-size:18px;display:flex;justify-content:space-between;gap:8px}
+.field label span{color:var(--muted);font-family:var(--f-body);font-weight:800}
+.field select{font:inherit;font-size:17px;padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+.field input[type=range]{width:100%;accent-color:var(--primary);height:32px}
+.note{color:var(--muted);font-size:15px;margin:0}
+</style>
+<style>body{padding-top:calc(12px + env(safe-area-inset-top,0px))}</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div class="ai-tag">AI generated</div>
+<script>
+// Wortschatz: [Englisch, Deutsch, Bild]
+const UNITS=[
+ {id:'hello',name:'Hallo',en:'Hello',color:'#F2762E',icon:'👋',words:[
+  ['hello','Hallo','👋'],['goodbye','Tschüss','🚪'],['good morning','Guten Morgen','🌅'],['good night','Gute Nacht','🌙'],
+  ['yes','Ja','✅'],['no','Nein','❌'],['please','Bitte','🙏'],['thank you','Danke','😊']]},
+ {id:'colours',name:'Farben',en:'Colours',color:'#D6409F',icon:'🎨',words:[
+  ['red','rot','🔴'],['blue','blau','🔵'],['green','grün','🟢'],['yellow','gelb','🟡'],['orange','orange','🟠'],
+  ['purple','lila','🟣'],['black','schwarz','⚫'],['white','weiß','⚪'],['brown','braun','🟤']]},
+ {id:'numbers',name:'Zahlen',en:'Numbers',color:'#2468E8',icon:'🔢',words:[
+  ['one','eins','1️⃣'],['two','zwei','2️⃣'],['three','drei','3️⃣'],['four','vier','4️⃣'],['five','fünf','5️⃣'],
+  ['six','sechs','6️⃣'],['seven','sieben','7️⃣'],['eight','acht','8️⃣'],['nine','neun','9️⃣'],['ten','zehn','🔟']]},
+ {id:'animals',name:'Tiere',en:'Animals',color:'#1FA463',icon:'🐶',words:[
+  ['cat','Katze','🐱'],['dog','Hund','🐶'],['mouse','Maus','🐭'],['bird','Vogel','🐦'],['fish','Fisch','🐟'],
+  ['horse','Pferd','🐴'],['cow','Kuh','🐮'],['pig','Schwein','🐷'],['rabbit','Hase','🐰'],['duck','Ente','🦆'],['sheep','Schaf','🐑'],['lion','Löwe','🦁']]},
+ {id:'family',name:'Familie',en:'Family',color:'#8A5CF6',icon:'👨‍👩‍👧',words:[
+  ['mum','Mama','👩'],['dad','Papa','👨'],['brother','Bruder','👦'],['sister','Schwester','👧'],
+  ['grandma','Oma','👵'],['grandpa','Opa','👴'],['baby','Baby','👶'],['family','Familie','👨‍👩‍👧‍👦']]},
+ {id:'school',name:'Schule',en:'School',color:'#D98E00',icon:'🎒',words:[
+  ['book','Buch','📖'],['pencil','Bleistift','✏️'],['pen','Kugelschreiber','🖊️'],['bag','Schultasche','🎒'],
+  ['ruler','Lineal','📏'],['scissors','Schere','✂️'],['school','Schule','🏫'],['teacher','Lehrer','🧑‍🏫']]},
+ {id:'food',name:'Essen',en:'Food',color:'#E0434A',icon:'🍎',words:[
+  ['apple','Apfel','🍎'],['banana','Banane','🍌'],['bread','Brot','🍞'],['milk','Milch','🥛'],['cheese','Käse','🧀'],
+  ['egg','Ei','🥚'],['pizza','Pizza','🍕'],['cake','Kuchen','🎂'],['water','Wasser','💧'],['ice cream','Eis','🍦']]},
+ {id:'body',name:'Körper',en:'Body',color:'#0E9AA7',icon:'🖐️',words:[
+  ['hand','Hand','✋'],['foot','Fuß','🦶'],['eye','Auge','👁️'],['ear','Ohr','👂'],['nose','Nase','👃'],
+  ['mouth','Mund','👄'],['leg','Bein','🦵'],['arm','Arm','💪'],['tooth','Zahn','🦷']]},
+ {id:'weather',name:'Wetter',en:'Weather',color:'#4F6BED',icon:'🌦️',words:[
+  ['sun','Sonne','☀️'],['rain','Regen','🌧️'],['snow','Schnee','❄️'],['wind','Wind','💨'],['cloud','Wolke','☁️'],
+  ['storm','Gewitter','⛈️'],['rainbow','Regenbogen','🌈'],['hot','heiß','🥵'],['cold','kalt','🥶']]},
+ {id:'clothes',name:'Kleidung',en:'Clothes',color:'#A8622D',icon:'👕',words:[
+  ['T-shirt','T-Shirt','👕'],['shoes','Schuhe','👟'],['dress','Kleid','👗'],['socks','Socken','🧦'],
+  ['jacket','Jacke','🧥'],['cap','Mütze','🧢'],['scarf','Schal','🧣'],['gloves','Handschuhe','🧤']]}
+];
+const NODE_X=[0,44,62,44,0,-44,-62,-44];
+
+// Helfer
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const byId=id=>UNITS.find(u=>u.id===id);
+const HAS_SPEECH=(()=>{try{return 'speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined';}catch(e){return false;}})();
+
+// Fortschritt (nur auf diesem Gerät)
+const KEY='englisch-mit-finn-v1';
+let S={xp:0,streak:0,last:'',stars:{},sound:true,voice:'',pitch:1.55,rate:.82};
+try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&typeof r==='object')S=Object.assign(S,r);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const dayStr=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>dayStr(new Date());
+const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayStr(d);};
+const curStreak=()=>(S.last===today()||S.last===yesterday())?S.streak:0;
+function touchStreak(){
+  const t=today();
+  if(S.last===t)return;
+  S.streak=(S.last===yesterday())?S.streak+1:1;
+  S.last=t;
+}
+
+// Ton und Sprache
+// Aussprache: manche Wörter klingen in der Sprachausgabe besser, wenn man sie anders schreibt
+const SAY={'T-shirt':'T shirt','ice cream':'ice cream','mum':'mum','wind':'wind'};
+const MALE=/daniel|oliver|arthur|thomas|ryan|google uk english male|male|gbd|rjs|gbb/i;
+function enVoices(){try{return speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));}catch(e){return [];}}
+function autoVoice(){
+  const vs=enVoices(),gb=vs.filter(v=>/^en[-_]GB/i.test(v.lang));
+  return gb.find(v=>MALE.test(v.name))||gb[0]||vs.find(v=>MALE.test(v.name))||vs[0]||null;
+}
+// Finn: ein 8-jähriger Junge, also hohe Tonhöhe und deutliches, etwas langsames Sprechen
+function speak(text,slow){
+  if(!HAS_SPEECH)return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(SAY[text]||text);
+    u.lang='en-GB';
+    u.pitch=S.pitch;
+    u.rate=S.rate*(slow?0.65:1);
+    let v=null;
+    if(S.voice)v=enVoices().find(x=>x.voiceURI===S.voice||x.name===S.voice)||null;
+    if(!v)v=autoVoice();
+    if(v){u.voice=v;u.lang=v.lang;}
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+let AC=null;
+function tone(f,t,d,type){
+  if(!S.sound)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime+t;
+    o.type=type||'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(.12,n);g.gain.exponentialRampToValueAtTime(.0001,n+d);
+    o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d+.02);
+  }catch(e){}
+}
+const sfx={
+  ok(){tone(660,0,.12);tone(880,.1,.2);},
+  bad(){tone(230,0,.25,'triangle');},
+  win(){[523,659,784,1047].forEach((f,i)=>tone(f,i*.13,.28));}
+};
+
+// Bilder (Symbole)
+const ICON={
+  star:'<svg class="star ON" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+  flame:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.9 4.2 5.5 6.2 5.5 11.4a5.5 5.5 0 0 1-11 0c0-2.2 1-3.8 2.2-5C9 10 11.2 7 12 1.5z" fill="#FF8A3D"/><path d="M12 12c.5 2 2.6 2.8 2.6 5a2.6 2.6 0 0 1-5.2 0c0-1.5.9-2.2 1.6-3 .4-.5.8-1 1-2z" fill="#FFD25C"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 1.5L4.5 13.5H11l-1 9 9-12.5h-6.5z" fill="#FFC83D" stroke="#C98F00" stroke-width="1" stroke-linejoin="round"/></svg>',
+  sound:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5v5h4l5 4v-13l-5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5v5h4l5 4v-13l-5 4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+};
+const starSvg=on=>ICON.star.replace('ON',on?'on':'off');
+function fox(){
+  return '<svg class="fox" viewBox="0 0 100 100" role="img" aria-label="Finn, der Fuchs">'+
+  '<path d="M12 10L44 28L20 54Z" fill="#F2762E"/><path d="M88 10L56 28L80 54Z" fill="#F2762E"/>'+
+  '<path d="M21 22L36 31L25 43Z" fill="#FFC9A0"/><path d="M79 22L64 31L75 43Z" fill="#FFC9A0"/>'+
+  '<ellipse cx="50" cy="56" rx="37" ry="31" fill="#F58A3A"/>'+
+  '<path d="M13 58Q50 48 87 58Q72 94 50 94Q28 94 13 58Z" fill="#FFF4E8"/>'+
+  '<circle cx="36" cy="54" r="5" fill="#16264A"/><circle cx="64" cy="54" r="5" fill="#16264A"/>'+
+  '<circle cx="37.6" cy="52.4" r="1.7" fill="#fff"/><circle cx="65.6" cy="52.4" r="1.7" fill="#fff"/>'+
+  '<ellipse cx="26" cy="66" rx="6" ry="3.5" fill="#FF9F8A" opacity=".7"/><ellipse cx="74" cy="66" rx="6" ry="3.5" fill="#FF9F8A" opacity=".7"/>'+
+  '<ellipse cx="50" cy="68" rx="5.5" ry="4" fill="#16264A"/>'+
+  '<path d="M42 75Q50 83 58 75" fill="none" stroke="#16264A" stroke-width="2.6" stroke-linecap="round"/></svg>';
+}
+</script>
+<script>
+// ---------- Fragen bauen ----------
+const W=a=>({en:a[0],de:a[1],pic:a[2]});
+function makeOpts(w,unit,type){
+  const others=shuffle(unit.words.filter(x=>x[0]!==w.en)).slice(0,3).map(W);
+  return shuffle([w].concat(others)).map(x=>({v:x.en,label:type==='en2de'?x.de:x.en,pic:x.pic}));
+}
+function build(type,w,unit){
+  const q={type:type,w:w};
+  if(type==='tiles'){
+    const base=w.en.split('').map((ch,i)=>({ch:ch,id:i}));
+    let sh=shuffle(base);
+    if(sh.map(t=>t.ch).join('')===w.en)sh=shuffle(sh);
+    q.tiles=sh;q.placed=[];
+  }else{
+    q.opts=makeOpts(w,unit,type);
+  }
+  return q;
+}
+const TILEABLE=/^[a-z]{3,9}$/;
+function makeLesson(unit){
+  const words=shuffle(unit.words.map(W));
+  const plan=['pic2en','en2de','listen','tiles','pic2en','de2en','listen','tiles','en2de','de2en'];
+  const qs=[];
+  for(let i=0;i<plan.length;i++){
+    let w=words[i%words.length],t=plan[i];
+    if(t==='tiles'&&!TILEABLE.test(w.en)){
+      const alt=words.find(x=>TILEABLE.test(x.en)&&!qs.some(q=>q.type==='tiles'&&q.w.en===x.en));
+      if(alt)w=alt;else t='pic2en';
+    }
+    qs.push(build(t,w,unit));
+  }
+  return qs;
+}
+
+// ---------- Startseite ----------
+function renderHome(){
+  L=null;
+  const total=UNITS.reduce((a,u)=>a+(S.stars[u.id]||0),0);
+  const nextIdx=UNITS.findIndex(u=>!(S.stars[u.id]>0));
+  const n=curStreak();
+  const sub=total>0?('Schon '+total+' von '+(UNITS.length*3)+' Sternen!'):'Komm, wir lernen zusammen Englisch!';
+  app.innerHTML=
+  '<header class="top"><button class="foxbtn" data-act="hi" aria-label="Finn sagt Hallo">'+fox()+'</button>'+'<div class="hello"><h1>Hello! Ich bin Finn.</h1><p>'+sub+'</p></div></header>'+
+  '<div class="chips">'+
+    '<span class="chip" title="Lernserie">'+ICON.flame+n+' '+(n===1?'Tag':'Tage')+'</span>'+
+    '<span class="chip" title="Punkte">'+ICON.bolt+S.xp+'</span>'+
+    '<button class="chip btn-chip'+(S.sound?'':' off')+'" data-act="sound" aria-pressed="'+(S.sound?'true':'false')+'" aria-label="Töne '+(S.sound?'ausschalten':'einschalten')+'">'+(S.sound?ICON.sound:ICON.mute)+'</button>'+
+    '<button class="chip btn-chip" data-act="voice">Stimme</button>'+
+  '</div>'+
+  '<section class="path" aria-label="Themen">'+
+  UNITS.map((u,i)=>{
+    const st=S.stars[u.id]||0;
+    return '<button class="node'+(i===nextIdx?' next':'')+'" data-act="open" data-unit="'+u.id+'" style="--c:'+u.color+';--x:'+NODE_X[i%NODE_X.length]+'px" aria-label="'+esc(u.name)+', '+st+' von 3 Sternen">'+
+      '<span class="bubble" aria-hidden="true">'+u.icon+(i===nextIdx?'<span class="tag">LOS!</span>':'')+'</span>'+
+      '<b>'+esc(u.name)+'</b><small>'+esc(u.en)+'</small>'+
+      '<span class="stars" aria-hidden="true">'+[1,2,3].map(k=>starSvg(k<=st)).join('')+'</span></button>';
+  }).join('')+
+  '</section>';
+  window.scrollTo(0,0);
+}
+
+// ---------- Wortkarten einer Einheit ----------
+function renderUnit(id){
+  const u=byId(id);
+  app.innerHTML=
+  '<div class="uhead"><button class="back" data-act="home" aria-label="Zurück">←</button>'+
+  '<div class="utitle"><span class="ubadge" style="--c:'+u.color+'" aria-hidden="true">'+u.icon+'</span><div><h2>'+esc(u.name)+'</h2><p>'+esc(u.en)+' · '+u.words.length+' Wörter</p></div></div></div>'+
+  '<p class="hint">Tippe auf eine Karte, dann hörst du das Wort.</p>'+
+  '<div class="wgrid">'+u.words.map(w=>'<button class="wcard" data-act="say" data-say="'+esc(w[0])+'"><span class="wpic" aria-hidden="true">'+w[2]+'</span><b>'+esc(w[0])+'</b><small>'+esc(w[1])+'</small></button>').join('')+'</div>'+
+  '<div class="stack"><button class="btn primary" data-act="start" data-unit="'+u.id+'">Lektion starten</button></div>';
+  window.scrollTo(0,0);
+}
+
+// ---------- Lektion ----------
+let L=null;
+const MSGS=['Super!','Genau!','Richtig!','Toll gemacht!','Prima!','Great!'];
+function choices(q,pic){
+  return '<div class="opts'+(pic?' grid2':'')+'">'+q.opts.map((o,k)=>{
+    let c='opt'+(pic?' pic':'');
+    if(L.checked){if(o.v===q.w.en)c+=' ok';else if(k===L.sel)c+=' bad';}
+    else if(k===L.sel)c+=' sel';
+    return '<button class="'+c+'" data-act="opt" data-k="'+k+'"'+(L.checked?' disabled':'')+(pic?' aria-label="Bild '+(k+1)+'"':'')+'>'+(pic?o.pic:esc(o.label))+'</button>';
+  }).join('')+'</div>';
+}
+function tilesUI(q){
+  const n=q.w.en.length;
+  const placed=q.placed.map(id=>{
+    const t=q.tiles.find(x=>x.id===id);
+    return '<button class="tile'+(L.checked?(L.ok?' ok':' bad'):'')+'" data-act="tile-del" data-id="'+id+'"'+(L.checked?' disabled':'')+'>'+esc(t.ch)+'</button>';
+  }).join('');
+  const empty=new Array(Math.max(0,n-q.placed.length)).fill('<span class="slot"></span>').join('');
+  const bank=q.tiles.map(t=>q.placed.includes(t.id)
+    ?'<span class="tile gap">'+esc(t.ch)+'</span>'
+    :'<button class="tile" data-act="tile-add" data-id="'+t.id+'"'+(L.checked?' disabled':'')+'>'+esc(t.ch)+'</button>').join('');
+  return '<div class="slots" aria-label="Dein Wort">'+placed+empty+'</div><div class="bank">'+bank+'</div>';
+}
+function renderLesson(auto){
+  const q=L.qs[L.i];
+  const pct=Math.round(L.i/L.qs.length*100);
+  const sp=big=>'<button class="speak'+(big?' huge':'')+'" data-act="say" data-say="'+esc(q.w.en)+'" aria-label="Wort anhören">'+ICON.sound+'</button>';
+  const slow=()=>HAS_SPEECH?'<button class="slowbtn" data-act="say" data-slow="1" data-say="'+esc(q.w.en)+'">🐢 langsam</button>':'';
+  let body='';
+  if(q.type==='pic2en')body='<h2>Wie heißt das auf Englisch?</h2><div class="big" aria-hidden="true">'+q.w.pic+'</div>'+choices(q,false);
+  else if(q.type==='en2de')body='<h2>Was bedeutet das Wort?</h2><div class="word">'+esc(q.w.en)+sp(false)+slow()+'</div>'+choices(q,false);
+  else if(q.type==='de2en')body='<h2>Wie sagt man das auf Englisch?</h2><div class="word">'+esc(q.w.de)+'</div>'+choices(q,false);
+  else if(q.type==='listen')body='<h2>Was hörst du?</h2>'+sp(true)+slow()+(HAS_SPEECH?'':'<div class="word">'+esc(q.w.en)+'</div>')+choices(q,true);
+  else body='<h2>Schreibe das Wort auf Englisch</h2><div class="big" aria-hidden="true">'+q.w.pic+'</div><div class="word" style="font-size:26px">'+esc(q.w.de)+'</div>'+tilesUI(q);
+  const can=L.checked||(q.type==='tiles'?q.placed.length===q.w.en.length:L.sel!==null);
+  let fcls='',fb='';
+  if(L.checked){
+    fcls=L.ok?'ok':'bad';
+    fb=L.ok?esc(L.msg):'Das war nicht ganz richtig.<small>Richtig ist: '+esc(q.type==='en2de'?q.w.de:q.w.en)+'</small>';
+  }
+  app.innerHTML=
+  '<div class="lesson"><div class="lhead"><button class="x" data-act="quit" aria-label="Lektion beenden">✕</button>'+
+  '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div></div>'+
+  '<div class="q">'+body+'</div></div>'+
+  '<div class="foot '+fcls+'"><div class="foot-in">'+(fb?'<div class="fb">'+fb+'</div>':'')+
+  '<button class="btn '+(L.checked?(L.ok?'good':'bad'):'primary')+'" data-act="check"'+(can?'':' disabled')+'>'+(L.checked?'Weiter':'Prüfen')+'</button></div></div>';
+  if(auto&&q.type==='listen')setTimeout(()=>speak(q.w.en),300);
+}
+function startLesson(id){
+  const unit=byId(id);
+  L={unit:unit,qs:makeLesson(unit),i:0,sel:null,checked:false,ok:false,wrong:0,xp:0,msg:''};
+  window.scrollTo(0,0);
+  renderLesson(true);
+}
+function doCheck(){
+  const q=L.qs[L.i];
+  if(!L.checked){
+    let ok;
+    if(q.type==='tiles')ok=q.placed.map(id=>q.tiles.find(t=>t.id===id).ch).join('')===q.w.en;
+    else ok=q.opts[L.sel].v===q.w.en;
+    L.checked=true;L.ok=ok;
+    if(ok){L.msg=MSGS[Math.floor(Math.random()*MSGS.length)];L.xp+=q.retried?5:10;sfx.ok();}
+    else{
+      L.wrong++;sfx.bad();
+      if(!q.retried){const r=build(q.type,q.w,L.unit);r.retried=true;L.qs.push(r);}
+    }
+    renderLesson();
+    setTimeout(()=>speak(q.w.en),200);
+  }else{
+    L.i++;L.sel=null;L.checked=false;L.ok=false;
+    if(L.i>=L.qs.length)finish();else{window.scrollTo(0,0);renderLesson(true);}
+  }
+}
+function finish(){
+  const u=L.unit;
+  const stars=L.wrong===0?3:(L.wrong<=2?2:1);
+  const gain=L.xp+(stars===3?10:0);
+  S.xp+=gain;S.stars[u.id]=Math.max(S.stars[u.id]||0,stars);
+  touchStreak();save();sfx.win();
+  const title=stars===3?'Perfekt!':(stars===2?'Sehr gut!':'Geschafft!');
+  const n=curStreak();
+  app.innerHTML=
+  '<div class="result">'+fox()+'<h1>'+title+'</h1>'+
+  '<p style="margin:4px 0 0;color:var(--muted)">'+esc(u.name)+' · '+esc(u.en)+'</p>'+
+  '<div class="rstars" aria-label="'+stars+' von 3 Sternen">'+[1,2,3].map(k=>starSvg(k<=stars)).join('')+'</div>'+
+  '<div class="gain">'+ICON.bolt+'<span>+'+gain+' Punkte</span></div>'+
+  '<p style="margin:14px 0 0;color:var(--muted)">Lernserie: '+n+' '+(n===1?'Tag':'Tage')+'</p>'+
+  '<div class="stack"><button class="btn primary" data-act="home">Weiter</button>'+
+  '<button class="btn" data-act="start" data-unit="'+u.id+'">Nochmal üben</button></div></div>';
+  L=null;window.scrollTo(0,0);
+}
+
+// ---------- Finns Stimme ----------
+function hi(){speak("Hi! I'm Finn. Let's learn English!");}
+function renderVoice(){
+  L=null;
+  const gb=v=>/^en[-_]GB/i.test(v.lang)?1:0;
+  const vs=enVoices().sort((a,b)=>(gb(b)-gb(a))||a.name.localeCompare(b.name));
+  const auto=autoVoice();
+  app.innerHTML=
+  '<div class="uhead"><button class="back" data-act="home" aria-label="Zurück">←</button><div class="utitle"><div><h2>Finns Stimme</h2><p>So klingt Finn beim Vorlesen</p></div></div></div>'+
+  (HAS_SPEECH?
+  '<div class="set"><button class="btn primary" data-act="hi">Finn sagt Hallo</button>'+
+  '<div class="field"><label for="voiceSel">Stimme</label><select id="voiceSel"><option value="">Automatisch'+(auto?' ('+esc(auto.name)+')':'')+'</option>'+
+  vs.map(v=>'<option value="'+esc(v.voiceURI)+'"'+(S.voice===v.voiceURI?' selected':'')+'>'+esc(v.name)+' ('+esc(v.lang)+')</option>').join('')+'</select></div>'+
+  '<div class="field"><label for="pitch">Tonhöhe <span id="pitchVal">'+Number(S.pitch).toFixed(2)+'</span></label><input id="pitch" type="range" min="0.8" max="2" step="0.05" value="'+S.pitch+'"></div>'+
+  '<div class="field"><label for="rate">Tempo <span id="rateVal">'+Number(S.rate).toFixed(2)+'</span></label><input id="rate" type="range" min="0.5" max="1.1" step="0.05" value="'+S.rate+'"></div>'+
+  '<button class="btn" data-act="voice-reset">Zurück auf Finn-Standard</button>'+
+  '<p class="note">Je höher die Tonhöhe, desto kindlicher klingt Finn. Welche Stimmen es gibt, hängt vom Gerät ab. Auf Android kannst du in den Einstellungen der „Google Sprachausgabe" weitere englische Stimmen laden.</p></div>'
+  :'<p class="hint">Dieses Gerät kann leider nicht vorlesen.</p>');
+  window.scrollTo(0,0);
+}
+app.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='voiceSel'){S.voice=t.value;save();hi();}
+  else if(t.id==='pitch'){S.pitch=Number(t.value);save();hi();}
+  else if(t.id==='rate'){S.rate=Number(t.value);save();hi();}
+});
+app.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='pitch'){const s=document.getElementById('pitchVal');if(s)s.textContent=Number(t.value).toFixed(2);}
+  else if(t.id==='rate'){const s=document.getElementById('rateVal');if(s)s.textContent=Number(t.value).toFixed(2);}
+});
+
+// ---------- Klicks ----------
+app.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(!el)return;
+  const a=el.dataset.act;
+  if(a==='open')renderUnit(el.dataset.unit);
+  else if(a==='home')renderHome();
+  else if(a==='start')startLesson(el.dataset.unit);
+  else if(a==='say')speak(el.dataset.say,!!el.dataset.slow);
+  else if(a==='hi')hi();
+  else if(a==='voice')renderVoice();
+  else if(a==='voice-reset'){S.voice='';S.pitch=1.55;S.rate=.82;save();renderVoice();hi();}
+  else if(a==='sound'){S.sound=!S.sound;save();renderHome();}
+  else if(a==='opt'&&L&&!L.checked){
+    const q=L.qs[L.i];
+    L.sel=Number(el.dataset.k);
+    if(q.type==='pic2en'||q.type==='de2en')speak(q.opts[L.sel].label);
+    renderLesson();
+  }
+  else if(a==='tile-add'&&L&&!L.checked){
+    const q=L.qs[L.i];
+    if(q.placed.length<q.w.en.length){q.placed.push(Number(el.dataset.id));renderLesson();}
+  }
+  else if(a==='tile-del'&&L&&!L.checked){
+    const q=L.qs[L.i];
+    q.placed=q.placed.filter(id=>id!==Number(el.dataset.id));renderLesson();
+  }
+  else if(a==='check'&&L)doCheck();
+  else if(a==='quit'){
+    app.insertAdjacentHTML('beforeend',
+      '<div class="modal" role="dialog" aria-modal="true" aria-label="Lektion beenden"><div class="card"><h2>Wirklich aufhören?</h2>'+
+      '<p>Dann geht diese Lektion von vorne los.</p>'+
+      '<button class="btn primary" data-act="quit-no">Weiterlernen</button>'+
+      '<button class="btn" data-act="quit-yes">Beenden</button></div></div>');
+  }
+  else if(a==='quit-no'){const m=app.querySelector('.modal');if(m)m.remove();}
+  else if(a==='quit-yes')renderHome();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||!L)return;
+  const f=document.activeElement;
+  if(f&&f.closest&&f.closest('button'))return;
+  const b=app.querySelector('[data-act="check"]');
+  if(b&&!b.disabled&&!app.querySelector('.modal')){e.preventDefault();b.click();}
+});
+try{if(HAS_SPEECH){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{if(app.querySelector('#voiceSel'))renderVoice();};}}catch(e){}
+renderHome();
+</script>
+<script>
+if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){});});}
+</script>
+</body>
+</html>
